@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Animal Hybrid Guessing Game</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f5f7fa;
+      color: #333;
+    }
+    
+    .game-container {
+      background-color: white;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    
+    .game-stats {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      padding: 10px;
+      background-color: #e9ecef;
+      border-radius: 5px;
+    }
+    
+    .stat {
+      text-align: center;
+      flex: 1;
+    }
+    
+    .image-container {
+      width: 100%;
+      height: 300px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 20px;
+      background-color: #f8f9fa;
+      border-radius: 5px;
+    }
+    
+    .animal-image {
+      max-width: 100%;
+      max-height: 100%;
+      border-radius: 5px;
+    }
+    
+    .answers-container {
+      display: grid;
+      grid-template-columns: repeat(1, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    
+    .answers-row {
+      margin-bottom: 10px;
+    }
+    
+    .answers-heading {
+      margin-bottom: 5px;
+      color: #495057;
+    }
+    
+    .answer-options {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+    
+    .option-button {
+      padding: 8px;
+      background-color: #e9ecef;
+      border: 1px solid #ced4da;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .option-button:hover {
+      background-color: #dee2e6;
+    }
+    
+    .option-button.selected {
+      background-color: #007bff;
+      color: white;
+    }
+    
+    .option-button.correct {
+      background-color: #28a745;
+      color: white;
+    }
+    
+    .option-button.incorrect {
+      background-color: #dc3545;
+      color: white;
+    }
+    
+    .submit-button {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      margin-top: 20px;
+      transition: background-color 0.2s;
+    }
+    
+    .submit-button:hover {
+      background-color: #0069d9;
+    }
+    
+    .submit-button:disabled {
+      background-color: #6c757d;
+      cursor: not-allowed;
+    }
+    
+    .progress-bar-container {
+      width: 100%;
+      height: 10px;
+      background-color: #e9ecef;
+      border-radius: 5px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    
+    .progress-bar {
+      height: 100%;
+      background-color: #007bff;
+      width: 100%;
+      transition: width 1s linear;
+    }
+    
+    .game-over {
+      text-align: center;
+      margin-top: 20px;
+    }
+    
+    .play-again {
+      padding: 10px 20px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-top: 10px;
+    }
+    
+    .results-table {
+      width: 100%;
+      margin-top: 20px;
+      border-collapse: collapse;
+    }
+    
+    .results-table th, .results-table td {
+      border: 1px solid #dee2e6;
+      padding: 8px;
+      text-align: center;
+    }
+    
+    .results-table th {
+      background-color: #e9ecef;
+    }
+    
+    .hidden {
+      display: none;
+    }
+    
+    @media (max-width: 600px) {
+      .answer-options {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="game-container">
+    <div class="header">
+      <h1>Animal Hybrid Guessing Game</h1>
+      <p>Guess the 3 animals used to create each hybrid creature!</p>
+    </div>
+
+    <div class="game-stats">
+      <div class="stat">
+        <h3>Score</h3>
+        <p id="score">0</p>
+      </div>
+      <div class="stat">
+        <h3>Round</h3>
+        <p id="round">1/10</p>
+      </div>
+      <div class="stat">
+        <h3>Time</h3>
+        <p id="time">30</p>
+      </div>
+    </div>
+
+    <div class="progress-bar-container">
+      <div class="progress-bar" id="timer-bar"></div>
+    </div>
+
+    <div class="image-container">
+      <img src="/api/placeholder/500/300" alt="Animal Hybrid" class="animal-image" id="hybrid-image">
+    </div>
+
+    <div class="answers-container">
+      <div class="answers-row">
+        <h3 class="answers-heading">Animal 1:</h3>
+        <div class="answer-options" id="options1"></div>
+      </div>
+      
+      <div class="answers-row">
+        <h3 class="answers-heading">Animal 2:</h3>
+        <div class="answer-options" id="options2"></div>
+      </div>
+      
+      <div class="answers-row">
+        <h3 class="answers-heading">Animal 3:</h3>
+        <div class="answer-options" id="options3"></div>
+      </div>
+    </div>
+
+    <button id="submit-btn" class="submit-button" disabled>Submit Guess</button>
+
+    <div id="game-over" class="game-over hidden">
+      <h2>Game Over!</h2>
+      <p>Your final score: <span id="final-score">0</span></p>
+      <table class="results-table">
+        <thead>
+          <tr>
+            <th>Round</th>
+            <th>Correct Animals</th>
+            <th>Your Guesses</th>
+            <th>Points</th>
+            <th>Time</th>
+          </tr>
+        </thead>
+        <tbody id="results-body">
+          <!-- Results will be added here -->
+        </tbody>
+      </table>
+      <button class="play-again" id="play-again">Play Again</button>
+    </div>
+  </div>
+
+  <script>
+    // Animal database
+    const animals = [
+      'Lion', 'Tiger', 'Elephant', 'Giraffe', 'Zebra', 'Kangaroo', 'Koala',
+      'Panda', 'Monkey', 'Gorilla', 'Penguin', 'Dolphin', 'Shark', 'Whale',
+      'Eagle', 'Owl', 'Parrot', 'Flamingo', 'Crocodile', 'Turtle',
+      'Snake', 'Frog', 'Butterfly', 'Spider', 'Bear', 'Wolf', 'Fox',
+      'Deer', 'Rabbit', 'Mouse', 'Squirrel', 'Raccoon', 'Beaver', 'Rhino',
+      'Hippopotamus', 'Camel', 'Horse', 'Donkey', 'Pig', 'Sheep'
+    ];
+
+    // Game state
+    let state = {
+      score: 0,
+      round: 1,
+      maxRounds: 10,
+      timeLeft: 30,
+      timerInterval: null,
+      currentHybrid: {
+        animals: [],
+        image: ''
+      },
+      selectedOptions: [null, null, null],
+      results: []
+    };
+
+    // DOM elements
+    const scoreEl = document.getElementById('score');
+    const roundEl = document.getElementById('round');
+    const timeEl = document.getElementById('time');
+    const timerBarEl = document.getElementById('timer-bar');
+    const hybridImageEl = document.getElementById('hybrid-image');
+    const optionsEl1 = document.getElementById('options1');
+    const optionsEl2 = document.getElementById('options2');
+    const optionsEl3 = document.getElementById('options3');
+    const submitBtn = document.getElementById('submit-btn');
+    const gameOverEl = document.getElementById('game-over');
+    const finalScoreEl = document.getElementById('final-score');
+    const resultsBodyEl = document.getElementById('results-body');
+    const playAgainBtn = document.getElementById('play-again');
+
+    // Initialize game
+    function initGame() {
+      state = {
+        score: 0,
+        round: 1,
+        maxRounds: 10,
+        timeLeft: 30,
+        timerInterval: null,
+        currentHybrid: {
+          animals: [],
+          image: ''
+        },
+        selectedOptions: [null, null, null],
+        results: []
+      };
+      
+      updateUI();
+      startRound();
+    }
+
+    // Start a new round
+    function startRound() {
+      clearInterval(state.timerInterval);
+      
+      // Reset selections
+      state.selectedOptions = [null, null, null];
+      
+      // Generate new hybrid
+      generateHybrid();
+      
+      // Start timer
+      state.timeLeft = 30;
+      timerBarEl.style.width = '100%';
+      updateUI();
+      
+      state.timerInterval = setInterval(() => {
+        state.timeLeft--;
+        const percentage = (state.timeLeft / 30) * 100;
+        timerBarEl.style.width = `${percentage}%`;
+        updateUI();
+        
+        if (state.timeLeft <= 0) {
+          clearInterval(state.timerInterval);
+          submitAnswer();
+        }
+      }, 1000);
+    }
+
+    // Generate a new hybrid animal
+    function generateHybrid() {
+      // Generate 3 unique animals
+      const shuffled = [...animals].sort(() => 0.5 - Math.random());
+      state.currentHybrid.animals = shuffled.slice(0, 3);
+      
+      // Generate "image" - in a real app, this would be a real API call to get an AI-generated image
+      // Here we're just using placeholder images with animal names in the URL to simulate
+      const animalString = state.currentHybrid.animals.join('-');
+      hybridImageEl.src = `/api/placeholder/500/300?text=${animalString}`;
+      
+      // Generate options for each position (including the correct answer)
+      generateOptions(optionsEl1, 0);
+      generateOptions(optionsEl2, 1);
+      generateOptions(optionsEl3, 2);
+    }
+
+    // Generate options for a specific position
+    function generateOptions(container, position) {
+      container.innerHTML = '';
+      
+      // Get 5 random animals (excluding the correct ones)
+      let options = [...animals].filter(animal => !state.currentHybrid.animals.includes(animal));
+      options = options.sort(() => 0.5 - Math.random()).slice(0, 4);
+      
+      // Add the correct animal
+      options.push(state.currentHybrid.animals[position]);
+      
+      // Shuffle the options
+      options = options.sort(() => 0.5 - Math.random());
+      
+      // Create buttons
+      options.forEach(animal => {
+        const button = document.createElement('button');
+        button.className = 'option-button';
+        button.textContent = animal;
+        button.dataset.animal = animal;
+        button.dataset.position = position;
+        
+        button.addEventListener('click', () => {
+          // Deselect all options in this row
+          Array.from(container.querySelectorAll('.option-button')).forEach(btn => {
+            btn.classList.remove('selected');
+          });
+          
+          // Select this option
+          button.classList.add('selected');
+          state.selectedOptions[position] = animal;
+          
+          // Enable submit button if all options are selected
+          if (state.selectedOptions.every(opt => opt !== null)) {
+            submitBtn.disabled = false;
+          }
+        });
+        
+        container.appendChild(button);
+      });
+    }
+
+    // Submit answer
+    function submitAnswer() {
+      clearInterval(state.timerInterval);
+      
+      let pointsEarned = 0;
+      const correctAnimals = [...state.currentHybrid.animals];
+      const guessedAnimals = [...state.selectedOptions];
+      
+      // Check each answer and calculate points
+      for (let i = 0; i < 3; i++) {
+        const optionsContainer = document.getElementById(`options${i+1}`);
+        const buttons = optionsContainer.querySelectorAll('.option-button');
+        
+        // Mark correct and incorrect answers
+        buttons.forEach(button => {
+          const animal = button.dataset.animal;
+          
+          if (animal === correctAnimals[i]) {
+            button.classList.add('correct');
+            if (guessedAnimals[i] === animal) {
+              // Correct guess
+              pointsEarned += 100 + state.timeLeft * 10;
+            }
+          } else if (button.classList.contains('selected')) {
+            button.classList.add('incorrect');
+          }
+        });
+      }
+      
+      // Update score
+      state.score += pointsEarned;
+      
+      // Save result
+      state.results.push({
+        round: state.round,
+        correctAnimals: [...correctAnimals],
+        guessedAnimals: [...guessedAnimals.map(a => a || 'No selection')],
+        points: pointsEarned,
+        timeLeft: state.timeLeft
+      });
+      
+      // Disable submit button
+      submitBtn.disabled = true;
+      
+      // Wait 2 seconds before next round
+      setTimeout(() => {
+        state.round++;
+        
+        if (state.round > state.maxRounds) {
+          endGame();
+        } else {
+          startRound();
+        }
+      }, 2000);
+      
+      updateUI();
+    }
+
+    // End game
+    function endGame() {
+      gameOverEl.classList.remove('hidden');
+      finalScoreEl.textContent = state.score;
+      
+      // Populate results table
+      resultsBodyEl.innerHTML = '';
+      
+      state.results.forEach(result => {
+        const row = document.createElement('tr');
+        
+        const roundCell = document.createElement('td');
+        roundCell.textContent = result.round;
+        
+        const correctCell = document.createElement('td');
+        correctCell.textContent = result.correctAnimals.join(', ');
+        
+        const guessedCell = document.createElement('td');
+        guessedCell.textContent = result.guessedAnimals.join(', ');
+        
+        const pointsCell = document.createElement('td');
+        pointsCell.textContent = result.points;
+        
+        const timeCell = document.createElement('td');
+        timeCell.textContent = result.timeLeft;
+        
+        row.appendChild(roundCell);
+        row.appendChild(correctCell);
+        row.appendChild(guessedCell);
+        row.appendChild(pointsCell);
+        row.appendChild(timeCell);
+        
+        resultsBodyEl.appendChild(row);
+      });
+    }
+
+    // Update UI elements
+    function updateUI() {
+      scoreEl.textContent = state.score;
+      roundEl.textContent = `${state.round}/${state.maxRounds}`;
+      timeEl.textContent = state.timeLeft;
+    }
+
+    // Event listeners
+    submitBtn.addEventListener('click', submitAnswer);
+    playAgainBtn.addEventListener('click', () => {
+      gameOverEl.classList.add('hidden');
+      initGame();
+    });
+
+    // Start the game
+    initGame();
+  </script>
+</body>
+</html>
